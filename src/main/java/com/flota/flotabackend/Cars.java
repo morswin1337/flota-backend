@@ -26,3 +26,5 @@ public class Cars {
     @Column(name = "mileage")
     private int mileage;
 }
+
+//dodaj walidacje
