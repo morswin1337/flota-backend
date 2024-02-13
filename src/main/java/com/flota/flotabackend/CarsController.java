@@ -7,61 +7,41 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/cars")
 public class CarsController {
 
+    private final CarsService carsService;
+
     @Autowired
-    private CarsRepository carsRepository;
-
-    @GetMapping("/cars")
-    //sprawdz ta linijke
-    public List<Cars> fetchCars(){
-        return carsRepository.findAll();
+    public CarsController(CarsService carsService) {
+        this.carsService = carsService;
     }
 
-    @PostMapping("/cars")
+    @GetMapping
+    public List<Cars> getAllCars() {
+        return carsService.fetchAllCars();
+    }
+
+    @PostMapping
     public Cars addCar(@RequestBody Cars car) {
-        return carsRepository.save(car);
+        return carsService.addCar(car);
     }
 
-    @PutMapping("/cars/{id}")
-    public ResponseEntity<Cars> updateCar(@PathVariable("id") int id, @RequestBody Map<String, Object> updates) {
-        try {
-            Optional<Cars> carData = carsRepository.findById(id);
-
-            if (carData.isPresent()) {
-                Cars existingCar = carData.get();
-
-                // Sprawdzamy, czy dane pole istnieje w aktualizacjach i jeśli tak, aktualizujemy wartość
-                if (updates.containsKey("make")) {
-                    existingCar.setMake((String) updates.get("make"));
-                }
-
-                if (updates.containsKey("model")) {
-                    existingCar.setModel((String) updates.get("model")); // Poprawna metoda dla pola 'model'
-                }
-
-                if (updates.containsKey("mileage")) {
-                    existingCar.setMileage((Integer) updates.get("mileage")); // Poprawna metoda dla pola 'mileage'
-                }
-                return new ResponseEntity<>(carsRepository.save(existingCar), HttpStatus.OK);
-            } else {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-        } catch (Exception e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
+    @PutMapping("/{id}")
+    public ResponseEntity<Cars> updateCar(@PathVariable int id, @RequestBody Map<String, Object> updates) {
+        return carsService.updateCar(id, updates)
+                .map(ResponseEntity::ok)
+                .orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    @DeleteMapping("/cars/{id}")
-    public ResponseEntity<HttpStatus> deleteCar(@PathVariable("id") int id){
-        try{
-            carsRepository.deleteById(id);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpStatus> deleteCar(@PathVariable int id) {
+        boolean isDeleted = carsService.deleteCar(id);
+        if (isDeleted) {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-        } catch (Exception e) {
+        } else {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
