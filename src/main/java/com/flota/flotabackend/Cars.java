@@ -12,9 +12,6 @@ import org.hibernate.annotations.GenericGenerator;
 @Entity
 @Table(name = "Cars")
 public class Cars {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    private int id;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "uuid", unique = true)
@@ -26,5 +23,3 @@ public class Cars {
     @Column(name = "mileage")
     private int mileage;
 }
-
-//dodaj walidacje
